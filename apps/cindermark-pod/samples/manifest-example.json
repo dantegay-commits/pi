@@ -1,0 +1,80 @@
+{
+  "shipments": [
+    {
+      "id": "3f8a1c52-9d44-4b1e-8f07-6c2a5b91d0e3",
+      "order_number": "SO-10482",
+      "purchase_order": "PO-77315",
+      "service_level": "Routine",
+      "scheduled_for": "2026-09-17T15:30:00Z",
+      "piece_count": 2,
+      "cold_chain_required": false,
+      "delivery_instructions": "Ring bell twice. Leave nothing outside.",
+      "customer": {
+        "account_number": "ACCT-3391",
+        "company_name": "Northside Family Care",
+        "contact_name": "Dana Whitfield",
+        "email": "dana.whitfield@example.com",
+        "phone": "(555) 010-2288",
+        "address": {
+          "line1": "1420 Marigold Avenue",
+          "line2": "Suite 200",
+          "city": "Sacramento",
+          "state": "CA",
+          "postal_code": "95815"
+        }
+      },
+      "line_items": [
+        {
+          "sku": "CM-OXY-5L",
+          "item_description": "Portable oxygen concentrator, 5 LPM, with carry case",
+          "manufacturer": "Inogen",
+          "quantity_shipped": 1,
+          "unit_of_measure": "EA",
+          "serial_number": "IG-4471902",
+          "hcpcs_code": "E1392"
+        },
+        {
+          "sku": "CM-CAN-25",
+          "item_description": "Nasal cannula, 25 ft, single patient use",
+          "manufacturer": "Salter Labs",
+          "quantity_shipped": 4,
+          "unit_of_measure": "EA",
+          "lot_number": "L-88213",
+          "expiration_date": "2028-06-30"
+        },
+        {
+          "sku": "CM-SOL-NS",
+          "item_description": "Sterile saline solution, 3 mL unit dose, box of 100",
+          "quantity_shipped": 2,
+          "unit_of_measure": "BX",
+          "lot_number": "NS-20261",
+          "expiration_date": "2027-11-30",
+          "cold_chain": false
+        }
+      ]
+    },
+    {
+      "order_number": "SO-10483",
+      "customer": {
+        "contact_name": "Marcus Bell",
+        "email": "m.bell@example.com",
+        "address": {
+          "line1": "88 Cedar Row",
+          "city": "Sacramento",
+          "state": "CA",
+          "postal_code": "95820"
+        }
+      },
+      "line_items": [
+        {
+          "sku": "CM-BED-STD",
+          "item_description": "Semi-electric hospital bed with rails",
+          "quantity_shipped": 1,
+          "unit_of_measure": "EA",
+          "serial_number": "BD-99120",
+          "hcpcs_code": "E0260"
+        }
+      ]
+    }
+  ]
+}

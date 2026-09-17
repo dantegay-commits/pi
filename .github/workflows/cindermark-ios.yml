@@ -1,0 +1,85 @@
+name: CINDERMARK POD
+
+# Apple's SDKs only run on Apple hardware, so the iOS app is built on a macOS
+# runner. Path-filtered: this does not fire for the rest of the repository.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/cindermark-pod/**'
+      - '.github/workflows/cindermark-ios.yml'
+  pull_request:
+    paths:
+      - 'apps/cindermark-pod/**'
+      - '.github/workflows/cindermark-ios.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: cindermark-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios-build:
+    name: Build the iOS app
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Record the toolchain
+        run: xcodebuild -version && swift --version
+
+      # A simulator build with signing off needs no Apple Developer account and
+      # no device. It answers the only question that matters here: does it
+      # compile against the real SDK?
+      - name: Build for the simulator
+        working-directory: apps/cindermark-pod/ios
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project CindermarkPOD.xcodeproj \
+            -scheme CindermarkPOD \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee /tmp/build.log
+
+      - name: Summarise errors and warnings
+        if: always()
+        run: |
+          {
+            echo '### Build diagnostics'
+            echo
+            if grep -qE '(error|warning):' /tmp/build.log; then
+              echo '```'
+              grep -E '(error|warning):' /tmp/build.log | sort -u | head -60
+              echo '```'
+            else
+              echo 'No errors or warnings.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify the portable core
+        working-directory: apps/cindermark-pod
+        run: ./verify/run.sh
+
+  plugin-tests:
+    name: WordPress plugin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint every PHP file
+        working-directory: apps/cindermark-pod/wordpress-plugin/cindermark-pod
+        run: |
+          status=0
+          while IFS= read -r f; do php -l "$f" >/dev/null || status=1; done \
+            < <(find . -name '*.php')
+          exit $status
+
+      - name: Request signing and replay protection
+        working-directory: apps/cindermark-pod/wordpress-plugin/cindermark-pod
+        run: php tests/test-auth.php
