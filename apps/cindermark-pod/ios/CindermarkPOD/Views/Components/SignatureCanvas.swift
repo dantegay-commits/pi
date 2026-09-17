@@ -46,7 +46,10 @@ struct SignatureCanvas: UIViewRepresentable {
       }
 
       func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-         Task { @MainActor in
+         // PencilKit calls this on the main thread; say so rather than schedule
+         // a hop, so the stroke count that gates the Complete button updates on
+         // the same stroke that changed it.
+         MainActor.assumeIsolated {
             pad.drawingChanged()
          }
       }

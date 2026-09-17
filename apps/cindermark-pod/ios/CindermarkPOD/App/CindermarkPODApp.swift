@@ -17,7 +17,7 @@ struct CindermarkPODApp: App {
             .tint(BrandColor.road)
             .task { await model.start() }
       }
-      .onChange(of: scenePhase) { phase in
+      .onChange(of: scenePhase) { _, phase in
          // Coming back to the foreground is the most likely moment for the iPad
          // to have signal again after a basement or a stairwell.
          guard phase == .active else { return }

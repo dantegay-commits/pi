@@ -57,23 +57,23 @@ reader to assume.
 ## Requirements
 
 - Xcode 16 or newer, and an Apple Developer account to run on real hardware
-- iOS or iPadOS 16 or newer
+- iOS or iPadOS 17 or newer
 - An Apple Pencil, for the input the signature screen was built for. A finger
   works; turn off "Apple Pencil only" in Settings first.
 - WordPress 6.2+ on PHP 7.4+, with working outbound mail
 
 ## Which devices it runs on
 
-Every iPhone and iPad that can run iOS 16: **iPhone 8 and later**, **iPad 5th
-generation and later**, all iPad Air, iPad mini 5 and later, and every iPad Pro.
-That is roughly everything Apple has sold since 2017.
+iOS and iPadOS **17 or newer**:
 
-iOS 16 rather than 17 is a deliberate choice. Dropping to 16 costs nothing and
-picks up the iPhone 8, iPhone X and the 5th-generation iPad - exactly the
-hand-me-down devices a small fleet ends up running. Going further back to iOS 15
-would mean giving up `NavigationSplitView`, `ShareLink` and `LabeledContent`,
-which is to say the whole iPad two-pane design, to gain devices from 2015 and
-2016 that cannot be bought new and mostly have dead batteries. Not worth it.
+- **iPhone** XS, XS Max and XR and later, plus iPhone SE (2nd generation and later)
+- **iPad** (6th generation and later), iPad Air (3rd generation and later),
+  iPad mini (5th generation and later)
+- **iPad Pro** 10.5-inch, 11-inch (all), and 12.9-inch (2nd generation and later)
+
+In practice that is anything Apple has sold since late 2018. It rules out the
+iPhone 8 and iPhone X, and the 5th-generation iPad, which stopped at iOS 16 - so
+if any of those are still in the van, they cannot run this.
 
 The layout adapts on **size class, not device**, which matters more than it
 sounds:

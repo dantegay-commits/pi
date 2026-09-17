@@ -34,7 +34,7 @@ struct ArchiveView: View {
                   DeliveryDetailView(delivery: selected)
                      .id(selected.id)
                } else {
-                  EmptyStateView(title: "Select a delivery", systemImage: "doc.text")
+                  ContentUnavailableView("Select a delivery", systemImage: "doc.text")
                }
             }
          } else {
@@ -82,10 +82,10 @@ struct ArchiveView: View {
       }
       .overlay {
          if archive.deliveries.isEmpty {
-            EmptyStateView(
-               title: "Nothing shipped yet",
+            ContentUnavailableView(
+               "Nothing shipped yet",
                systemImage: "folder",
-               message: "Signed deliveries are filed here by month, and in the Files app under CINDERMARK POD."
+               description: Text("Signed deliveries are filed here by month, and in the Files app under CINDERMARK POD.")
             )
          }
       }

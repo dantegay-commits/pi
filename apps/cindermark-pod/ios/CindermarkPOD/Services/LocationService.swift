@@ -135,13 +135,15 @@ final class LocationService: NSObject, ObservableObject {
 }
 
 extension LocationService: CLLocationManagerDelegate {
-   // Core Location delivers these on the queue the manager was created on, but
-   // that is not something the compiler can know, so each hops to the main
-   // actor explicitly. `finishFix` is the single exit point for the fix
-   // continuation, so the hop racing the timeout cannot resume it twice.
+   // Core Location delivers these on the queue the manager was created on, which
+   // is main here - but that is not something the compiler can know, so each
+   // one states it. `assumeIsolated` asserts what is already true rather than
+   // scheduling a hop, so the continuation resumes on the same turn of the run
+   // loop the fix arrived on. `finishFix` is the single exit point for the fix
+   // continuation, so a callback racing the timeout cannot resume it twice.
    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-      let status = manager.authorizationStatus
-      Task { @MainActor in
+      MainActor.assumeIsolated {
+         let status = manager.authorizationStatus
          authorizationStatus = status
          guard status != .notDetermined, let continuation = authContinuation else { return }
          authContinuation = nil
@@ -150,14 +152,13 @@ extension LocationService: CLLocationManagerDelegate {
    }
 
    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-      let fix = locations.last
-      Task { @MainActor in
-         finishFix(with: fix)
+      MainActor.assumeIsolated {
+         finishFix(with: locations.last)
       }
    }
 
    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-      Task { @MainActor in
+      MainActor.assumeIsolated {
          finishFix(with: nil)
       }
    }

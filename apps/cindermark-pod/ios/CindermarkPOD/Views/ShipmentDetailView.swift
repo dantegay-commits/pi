@@ -299,10 +299,10 @@ private struct CompletedStopView: View {
          if let delivery {
             DeliveryDetailView(delivery: delivery)
          } else {
-            EmptyStateView(
-               title: "Signed",
+            ContentUnavailableView(
+               "Signed",
                systemImage: "checkmark.seal",
-               message: "This stop was signed on another device, or its archived copy is missing from this one."
+               description: Text("This stop was signed on another device, or its archived copy is missing from this one.")
             )
          }
       }

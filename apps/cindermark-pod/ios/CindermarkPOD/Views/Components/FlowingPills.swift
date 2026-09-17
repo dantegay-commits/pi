@@ -18,7 +18,7 @@ struct FlowingPills<Content: View>: View {
    }
 }
 
-/// Wrapping layout. `Layout` is iOS 16, which is the app's floor.
+/// Wrapping layout, built on the `Layout` protocol.
 struct FlowLayout: Layout {
    var spacing: CGFloat = 6
    var lineSpacing: CGFloat = 6
