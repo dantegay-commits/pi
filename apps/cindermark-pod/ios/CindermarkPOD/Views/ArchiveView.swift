@@ -84,7 +84,7 @@ private struct ArchiveRow: View {
             case .pending:
                Image(systemName: "clock").foregroundStyle(.secondary)
             case .failed:
-               Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(BrandColor.ember)
+               Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(BrandColor.alert)
             }
          }
          Text(delivery.record.customer.displayName)

@@ -11,6 +11,7 @@ Two halves, both in this directory:
 | `ios/` | The iPad app. SwiftUI, PencilKit, iOS 17+. |
 | `wordpress-plugin/cindermark-pod/` | The site end. Receives the signed record, files it, sends the email. |
 | `samples/manifest-example.json` | A manifest in the format the app imports. |
+| `brand/` | The logo source and the script that rebuilds the artwork from it. |
 | `docs/` | Verifying a record, and notes on patient data. |
 
 ## What happens at the door
@@ -79,30 +80,35 @@ There are no package dependencies. The project uses a file-system synchronised
 group, so new Swift files added to `ios/CindermarkPOD/` are picked up without
 touching the project file.
 
-### Adding the real logos
+### Branding
 
-The app ships with a typographic stand-in so nothing renders as a blank box.
-Drop the CINDERMARK artwork into these image sets in
-`ios/CindermarkPOD/Assets.xcassets` and rebuild; the app and the PDF pick it up
-automatically:
+The CINDERMARK logo is already in the app, the app icon and the PDF header. It
+was rebuilt from a photo of the logo on a screen - see `brand/README.md` for how,
+and for how to replace it if the original vector artwork turns up. Four
+arrangements are in the asset catalog:
 
-| Image set | Used for | Suggested |
-|---|---|---|
-| `LogoPrimary` | App screens | Full colour lockup, PDF vector or @1x/@2x/@3x PNG |
-| `LogoDocument` | The PDF header | Dark or single-colour version, reads on white |
-| `LogoMark` | Compact spots | The mark alone, no wordmark |
+| Image set | Used for |
+|---|---|
+| `LogoDocument` | Horizontal lockup: the PDF header band and toolbars |
+| `LogoPrimary` | Stacked lockup: large, centred moments |
+| `LogoMark` | The C and its road, alone |
+| `LogoWordmark` | The type, alone |
 
-Those image sets are empty until you fill them, which Xcode reports as a build
-warning. The build succeeds; the warning goes away with the artwork.
+The stacked lockup is nearly square, so in a 22pt toolbar it would shrink to
+about 28pt wide and read as a smudge. That is why headers use the horizontal
+arrangement, and only the empty state uses the stacked one.
 
-Company name, website, phone and the wording of the signed attestation live in
-`ios/CindermarkPOD/Branding/BrandConfig.swift`. The palette is in the asset
-catalog (`BrandEmber`, `BrandInk`, `BrandSlate`, `BrandPaper`) and mirrored as
-fixed sRGB values in `BrandColor.Document` for the PDF, so a document printed
+The palette comes from the artwork itself: navy `#364564` for the letterform and
+ink, road blue `#3D6FB0` for the accent. Both are in the asset catalog
+(`BrandInk`, `BrandRoad`, `BrandSlate`, `BrandPaper`, `BrandAlert`) and mirrored
+as fixed sRGB values in `BrandColor.Document` for the PDF, so a document printed
 from an iPad in dark mode looks the same as one printed in light mode.
 
-The app icon slot is empty. Add a 1024x1024 image to `AppIcon` before
-distributing.
+`BrandAlert` is deliberately outside the brand. An exception on a receipt has to
+read as an exception, and brand blue would make it look like another heading.
+
+Company name, website, phone and the wording of the signed attestation live in
+`ios/CindermarkPOD/Branding/BrandConfig.swift`.
 
 ## Installing the WordPress plugin
 
@@ -214,6 +220,9 @@ allow-list and file format sniffing. No WordPress install needed.
 - **It is not verified against a real build.** The Swift was written without a
   Mac to compile it on; expect to fix small things the first time you open it in
   Xcode. The PHP is syntax-checked and its auth path is tested.
+- The logo artwork is recovered from a photograph, not from the original vector
+  file, so it is very slightly soft at large sizes and the two brand colours are
+  measured approximations. `brand/README.md` covers replacing both.
 - No offline map tiles, barcode scanning, temperature logging or route
   optimisation.
 - No multi-driver accounts. Every iPad is one device with one driver name.

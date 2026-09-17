@@ -1,102 +1,79 @@
 import SwiftUI
 import UIKit
 
-/// Logo lookup with a drawn fallback.
+/// The CINDERMARK artwork, in the four arrangements the app needs.
 ///
-/// Drop the real CINDERMARK artwork into the asset catalog and it is used
-/// everywhere automatically:
+///   LogoPrimary    the stacked lockup: mark over CINDERMARK / MEDICAL LOGISTICS
+///   LogoDocument   a horizontal lockup, for the PDF header band and toolbars
+///   LogoMark       the C and its road, alone
+///   LogoWordmark   the type, alone
 ///
-///   Assets.xcassets/LogoPrimary.imageset   full lockup, app screens
-///   Assets.xcassets/LogoDocument.imageset  PDF header (mono/dark version)
-///   Assets.xcassets/LogoMark.imageset      icon-only mark, compact layouts
+/// The stacked lockup is close to square, so in a 22pt toolbar it would shrink
+/// to about 28pt wide and read as a smudge. That is why headers use the
+/// horizontal arrangement and only large, centred moments use the stacked one.
 ///
-/// Until those slots are filled, `UIImage(named:)` returns nil and the app draws
-/// a plain wordmark instead, so nothing ever renders as a blank space or a
-/// missing-image box.
+/// If an image set is ever emptied, `UIImage(named:)` returns nil and the app
+/// falls back to a plain wordmark rather than rendering a blank space.
 enum BrandLogo {
    static var primary: UIImage? { UIImage(named: "LogoPrimary") }
    static var mark: UIImage? { UIImage(named: "LogoMark") }
-
-   /// The PDF prefers a document-specific version, then the main lockup.
+   static var wordmark: UIImage? { UIImage(named: "LogoWordmark") }
    static var document: UIImage? { UIImage(named: "LogoDocument") ?? primary }
 
-   static var hasArtwork: Bool { primary != nil || document != nil }
+   static var hasArtwork: Bool { UIImage(named: "LogoDocument") != nil || primary != nil }
 }
 
-/// App-side logo: real artwork if present, otherwise the wordmark.
+/// Horizontal lockup, sized by height. For toolbars, headers and list rows.
 struct BrandLogoView: View {
-   var height: CGFloat = 34
-   var showsDivision = true
+   var height: CGFloat = 26
 
    var body: some View {
-      if let image = BrandLogo.primary {
+      if let image = BrandLogo.document {
          Image(uiImage: image)
             .resizable()
             .scaledToFit()
             .frame(height: height)
             .accessibilityLabel(BrandConfig.companyName)
       } else {
-         BrandWordmark(height: height, showsDivision: showsDivision)
+         BrandWordmark(height: height)
       }
    }
 }
 
-/// Typographic stand-in for the logo.
-struct BrandWordmark: View {
-   var height: CGFloat = 34
-   var showsDivision = true
+/// Stacked lockup, sized by width. For empty states and anywhere the logo is
+/// the subject rather than a label.
+struct BrandLockupView: View {
+   var width: CGFloat = 220
 
    var body: some View {
-      HStack(spacing: height * 0.26) {
-         EmberMark()
-            .fill(BrandColor.ember)
-            .frame(width: height * 0.72, height: height * 0.86)
-         VStack(alignment: .leading, spacing: height * 0.06) {
-            Text(BrandConfig.companyShortName)
-               .font(.system(size: height * 0.58, weight: .heavy))
-               .kerning(height * 0.05)
-               .foregroundStyle(BrandColor.ink)
-            if showsDivision {
-               Text(BrandConfig.divisionLine)
-                  .font(.system(size: height * 0.235, weight: .semibold))
-                  .kerning(height * 0.09)
-                  .foregroundStyle(BrandColor.slate)
-            }
-         }
+      if let image = BrandLogo.primary {
+         Image(uiImage: image)
+            .resizable()
+            .scaledToFit()
+            .frame(width: width)
+            .accessibilityLabel(BrandConfig.companyName)
+      } else {
+         BrandWordmark(height: width * 0.22)
+      }
+   }
+}
+
+/// Typographic stand-in, used only when the artwork is missing.
+struct BrandWordmark: View {
+   var height: CGFloat = 26
+
+   var body: some View {
+      VStack(alignment: .leading, spacing: height * 0.08) {
+         Text(BrandConfig.companyShortName)
+            .font(.system(size: height * 0.56, weight: .heavy))
+            .kerning(height * 0.04)
+            .foregroundStyle(BrandColor.ink)
+         Text(BrandConfig.divisionLine)
+            .font(.system(size: height * 0.22, weight: .semibold))
+            .kerning(height * 0.09)
+            .foregroundStyle(BrandColor.slate)
       }
       .accessibilityElement(children: .combine)
       .accessibilityLabel(BrandConfig.companyName)
-   }
-}
-
-/// A stylised ember: the placeholder mark. Replace by filling LogoMark.
-struct EmberMark: Shape {
-   func path(in rect: CGRect) -> Path {
-      var path = Path()
-      let width = rect.width
-      let height = rect.height
-      path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-      path.addCurve(
-         to: CGPoint(x: rect.maxX, y: rect.minY + height * 0.62),
-         control1: CGPoint(x: rect.midX + width * 0.28, y: rect.minY + height * 0.18),
-         control2: CGPoint(x: rect.maxX, y: rect.minY + height * 0.34)
-      )
-      path.addCurve(
-         to: CGPoint(x: rect.midX, y: rect.maxY),
-         control1: CGPoint(x: rect.maxX, y: rect.minY + height * 0.86),
-         control2: CGPoint(x: rect.midX + width * 0.26, y: rect.maxY)
-      )
-      path.addCurve(
-         to: CGPoint(x: rect.minX, y: rect.minY + height * 0.62),
-         control1: CGPoint(x: rect.midX - width * 0.26, y: rect.maxY),
-         control2: CGPoint(x: rect.minX, y: rect.minY + height * 0.86)
-      )
-      path.addCurve(
-         to: CGPoint(x: rect.midX, y: rect.minY),
-         control1: CGPoint(x: rect.minX, y: rect.minY + height * 0.34),
-         control2: CGPoint(x: rect.midX - width * 0.28, y: rect.minY + height * 0.18)
-      )
-      path.closeSubpath()
-      return path
    }
 }

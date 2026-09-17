@@ -46,7 +46,7 @@ struct DetailRow: View {
    }
 }
 
-/// Section heading in the CINDERMARK style: small, tracked, ember.
+/// Section heading in the CINDERMARK style: small, tracked, road blue.
 struct SectionHeading: View {
    let title: String
 
@@ -54,6 +54,6 @@ struct SectionHeading: View {
       Text(title.uppercased())
          .font(.caption.weight(.bold))
          .kerning(1.2)
-         .foregroundStyle(BrandColor.ember)
+         .foregroundStyle(BrandColor.road)
    }
 }

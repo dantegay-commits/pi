@@ -177,7 +177,7 @@ private final class DocumentWriter {
       PodPDFText.rule(
          from: CGPoint(x: margin, y: ruleY),
          to: CGPoint(x: pageSize.width - margin, y: ruleY),
-         color: BrandColor.Document.ember,
+         color: BrandColor.Document.road,
          width: 1.5
       )
       return ruleY + 16
@@ -189,7 +189,7 @@ private final class DocumentWriter {
          PodPDFText.attributed(
             BrandConfig.companyShortName,
             font: PodPDFText.font(19, .heavy),
-            color: BrandColor.Document.ember,
+            color: BrandColor.Document.road,
             tracking: 1.2
          ),
          in: CGRect(x: box.minX, y: box.minY, width: box.width, height: 24)
@@ -248,7 +248,7 @@ private final class DocumentWriter {
          PodPDFText.attributed(
             title.uppercased(),
             font: PodPDFText.font(8, .bold),
-            color: BrandColor.Document.ember,
+            color: BrandColor.Document.road,
             tracking: 1.4
          ),
          in: CGRect(x: margin, y: y, width: contentWidth, height: 12)
@@ -408,7 +408,7 @@ private final class DocumentWriter {
       return PodPDFText.attributed(
          "Exception - \(parts.joined(separator: ". "))",
          font: PodPDFText.font(7.6, .medium),
-         color: BrandColor.Document.ember
+         color: BrandColor.Document.alert
       )
    }
 
@@ -416,8 +416,8 @@ private final class DocumentWriter {
       let height = manifestRowHeight(line)
       let rowRect = CGRect(x: margin, y: y, width: contentWidth, height: height)
       if !line.isClean {
-         PodPDFText.fill(rowRect, with: BrandColor.Document.exceptionTint)
-         PodPDFText.fill(CGRect(x: margin, y: y, width: 2, height: height), with: BrandColor.Document.ember)
+         PodPDFText.fill(rowRect, with: BrandColor.Document.alertTint)
+         PodPDFText.fill(CGRect(x: margin, y: y, width: 2, height: height), with: BrandColor.Document.alert)
       } else if zebra {
          PodPDFText.fill(rowRect, with: BrandColor.Document.zebra)
       }
@@ -426,7 +426,7 @@ private final class DocumentWriter {
       var x = margin
       for (index, column) in columns.enumerated() {
          let isStatus = index == columns.count - 1
-         let color = isStatus && !line.isClean ? BrandColor.Document.ember : BrandColor.Document.ink
+         let color = isStatus && !line.isClean ? BrandColor.Document.alert : BrandColor.Document.ink
          let weight: UIFont.Weight = isStatus ? .semibold : .regular
          PodPDFText.draw(
             PodPDFText.attributed(
@@ -486,7 +486,7 @@ private final class DocumentWriter {
          let text = PodPDFText.attributed(summary, font: PodPDFText.font(8.5), color: BrandColor.Document.ink)
          let height = PodPDFText.height(text, width: contentWidth - 12)
          ensure(height + 6)
-         PodPDFText.fill(CGRect(x: margin, y: y, width: 2, height: height), with: BrandColor.Document.ember)
+         PodPDFText.fill(CGRect(x: margin, y: y, width: 2, height: height), with: BrandColor.Document.alert)
          PodPDFText.draw(text, in: CGRect(x: margin + 12, y: y, width: contentWidth - 12, height: height))
          y += height + 6
       }

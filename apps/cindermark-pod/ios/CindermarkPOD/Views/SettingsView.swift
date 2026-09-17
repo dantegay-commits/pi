@@ -71,7 +71,7 @@ struct SettingsView: View {
          if let testResult {
             Label(testResult, systemImage: testFailed ? "xmark.octagon.fill" : "checkmark.circle.fill")
                .font(.footnote)
-               .foregroundStyle(testFailed ? BrandColor.ember : .green)
+               .foregroundStyle(testFailed ? BrandColor.alert : .green)
          }
       } header: {
          SectionHeading(title: "CINDERMARK site")
@@ -138,7 +138,7 @@ struct SettingsView: View {
             StatusPill(
                title: BrandLogo.hasArtwork ? "Logo installed" : "Placeholder wordmark",
                systemImage: BrandLogo.hasArtwork ? "checkmark.seal.fill" : "exclamationmark.circle",
-               tint: BrandLogo.hasArtwork ? .green : BrandColor.ember
+               tint: BrandLogo.hasArtwork ? .green : BrandColor.alert
             )
          }
       } header: {

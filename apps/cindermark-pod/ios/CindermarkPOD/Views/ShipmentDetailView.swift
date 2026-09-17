@@ -104,7 +104,7 @@ struct ShipmentDetailView: View {
                .textInputAutocapitalization(.never)
                .autocorrectionDisabled()
                .multilineTextAlignment(.trailing)
-               .foregroundStyle(emailIsUsable ? Color.primary : BrandColor.ember)
+               .foregroundStyle(emailIsUsable ? Color.primary : BrandColor.alert)
          }
          if !draft.customer.phone.isBlank {
             LabeledContent("Phone", value: draft.customer.phone)
@@ -124,7 +124,7 @@ struct ShipmentDetailView: View {
                ForEach(issues, id: \.self) { issue in
                   Label(issue, systemImage: "exclamationmark.triangle.fill")
                      .font(.footnote)
-                     .foregroundStyle(BrandColor.ember)
+                     .foregroundStyle(BrandColor.alert)
                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -137,7 +137,7 @@ struct ShipmentDetailView: View {
                if draft.hasExceptions {
                   Text("\(draft.exceptions.count) exception\(draft.exceptions.count == 1 ? "" : "s") recorded")
                      .font(.caption)
-                     .foregroundStyle(BrandColor.ember)
+                     .foregroundStyle(BrandColor.alert)
                } else {
                   Text("No exceptions")
                      .font(.caption)
@@ -192,7 +192,7 @@ private struct ManifestLineEditor: View {
                StatusPill(title: "Cold chain", systemImage: "thermometer.snowflake", tint: .blue)
             }
             if line.item.controlledSubstance {
-               StatusPill(title: "Controlled", systemImage: "lock.fill", tint: BrandColor.ember)
+               StatusPill(title: "Controlled", systemImage: "lock.fill", tint: BrandColor.alert)
             }
          }
 
@@ -239,7 +239,7 @@ private struct ManifestLineEditor: View {
             .overlay(alignment: .leading) {
                if line.needsNote {
                   Rectangle()
-                     .fill(BrandColor.ember)
+                     .fill(BrandColor.alert)
                      .frame(width: 3)
                      .padding(.vertical, 2)
                      .offset(x: -8)

@@ -27,7 +27,7 @@ struct RootView: View {
 struct NoStopSelectedView: View {
    var body: some View {
       VStack(spacing: 18) {
-         BrandLogoView(height: 44)
+         BrandLockupView(width: 210)
          Text("Select a stop to begin")
             .font(.title3.weight(.medium))
             .foregroundStyle(.secondary)

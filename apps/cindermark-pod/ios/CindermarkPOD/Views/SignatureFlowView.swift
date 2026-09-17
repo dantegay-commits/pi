@@ -65,7 +65,7 @@ struct SignatureFlowView: View {
                .disabled(isSubmitting)
          }
          ToolbarItem(placement: .principal) {
-            BrandLogoView(height: 20, showsDivision: false)
+            BrandLogoView(height: 20)
          }
          ToolbarItem(placement: .confirmationAction) {
             Button {
@@ -113,7 +113,7 @@ struct SignatureFlowView: View {
                         if !line.isClean {
                            Text("\(line.disposition.label)\(line.note.isBlank ? "" : " - \(line.note.trimmed)")")
                               .font(.caption)
-                              .foregroundStyle(BrandColor.ember)
+                              .foregroundStyle(BrandColor.alert)
                         }
                      }
                   }
@@ -143,7 +143,7 @@ struct SignatureFlowView: View {
             .font(.caption)
          Label(locationStatusText, systemImage: locationStatusIcon)
             .font(.caption)
-            .foregroundStyle(locationIsReady ? .secondary : BrandColor.ember)
+            .foregroundStyle(locationIsReady ? .secondary : BrandColor.alert)
          if !settings.driverName.isBlank {
             Label(settings.driverName, systemImage: "person.badge.shield.checkmark")
                .font(.caption)
@@ -246,7 +246,7 @@ struct SignatureFlowView: View {
             .fill(Color.white)
             .overlay {
                RoundedRectangle(cornerRadius: 14)
-                  .strokeBorder(pad.strokeCount == 0 ? BrandColor.slate.opacity(0.35) : BrandColor.ember, lineWidth: 1.5)
+                  .strokeBorder(pad.strokeCount == 0 ? BrandColor.slate.opacity(0.35) : BrandColor.road, lineWidth: 1.5)
             }
 
          VStack(alignment: .leading, spacing: 0) {

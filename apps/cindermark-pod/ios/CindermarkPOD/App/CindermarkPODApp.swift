@@ -14,7 +14,7 @@ struct CindermarkPODApp: App {
             .environmentObject(model.archive)
             .environmentObject(model.outbox)
             .environmentObject(model.location)
-            .tint(BrandColor.ember)
+            .tint(BrandColor.road)
             .task { await model.start() }
       }
       .onChange(of: scenePhase) { _, phase in

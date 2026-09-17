@@ -17,7 +17,7 @@ struct DeliveryCompleteView: View {
          VStack(spacing: 22) {
             Image(systemName: "checkmark.seal.fill")
                .font(.system(size: 60))
-               .foregroundStyle(BrandColor.ember)
+               .foregroundStyle(BrandColor.road)
                .padding(.top, 20)
 
             VStack(spacing: 6) {
@@ -83,7 +83,7 @@ struct DeliveryCompleteView: View {
             }
          } else {
             Label("Saved on this iPad, not sent yet", systemImage: "clock.arrow.circlepath")
-               .foregroundStyle(BrandColor.ember)
+               .foregroundStyle(BrandColor.alert)
             Text(outcome.uploadError ?? "It will send automatically once there is signal.")
                .font(.footnote)
                .foregroundStyle(.secondary)
@@ -96,7 +96,7 @@ struct DeliveryCompleteView: View {
          } else {
             Label("No location was recorded", systemImage: "location.slash")
                .font(.footnote)
-               .foregroundStyle(BrandColor.ember)
+               .foregroundStyle(BrandColor.alert)
          }
       }
       .frame(maxWidth: .infinity, alignment: .leading)

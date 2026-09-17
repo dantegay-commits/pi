@@ -55,7 +55,7 @@ struct StopListView: View {
       .navigationTitle("Today's run")
       .toolbar {
          ToolbarItem(placement: .topBarLeading) {
-            BrandLogoView(height: 22, showsDivision: false)
+            BrandLogoView(height: 22)
                .padding(.vertical, 2)
          }
          ToolbarItem(placement: .primaryAction) {
@@ -142,7 +142,7 @@ struct StopListView: View {
       if pending > 0 || !outbox.isOnline {
          HStack(spacing: 8) {
             Image(systemName: outbox.isOnline ? "arrow.up.circle" : "wifi.slash")
-               .foregroundStyle(outbox.isOnline ? BrandColor.ember : BrandColor.slate)
+               .foregroundStyle(outbox.isOnline ? BrandColor.road : BrandColor.slate)
             VStack(alignment: .leading, spacing: 1) {
                Text(pending == 1 ? "1 delivery waiting to send" : "\(pending) deliveries waiting to send")
                   .font(.footnote.weight(.semibold))
@@ -178,7 +178,7 @@ private struct StopRow: View {
             Spacer()
             if shipment.isCompleted {
                Image(systemName: "checkmark.seal.fill")
-                  .foregroundStyle(BrandColor.ember)
+                  .foregroundStyle(BrandColor.road)
                   .accessibilityLabel("Signed")
             }
          }
@@ -197,7 +197,7 @@ private struct StopRow: View {
                StatusPill(title: "Cold chain", systemImage: "thermometer.snowflake", tint: .blue)
             }
             if shipment.hasControlledSubstance {
-               StatusPill(title: "Controlled", systemImage: "lock.fill", tint: BrandColor.ember)
+               StatusPill(title: "Controlled", systemImage: "lock.fill", tint: BrandColor.alert)
             }
          }
       }

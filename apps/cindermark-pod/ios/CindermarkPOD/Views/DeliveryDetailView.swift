@@ -49,7 +49,7 @@ struct DeliveryDetailView: View {
             StatusPill(
                title: "\(record.exceptions.count) exception\(record.exceptions.count == 1 ? "" : "s")",
                systemImage: "exclamationmark.triangle.fill",
-               tint: BrandColor.ember
+               tint: BrandColor.alert
             )
          }
       }
@@ -71,7 +71,7 @@ struct DeliveryDetailView: View {
          case .failed:
             VStack(alignment: .leading, spacing: 8) {
                Label("Not sent yet", systemImage: "exclamationmark.arrow.triangle.2.circlepath")
-                  .foregroundStyle(BrandColor.ember)
+                  .foregroundStyle(BrandColor.alert)
                if let error = current.lastUploadError {
                   Text(error)
                      .font(.footnote)
