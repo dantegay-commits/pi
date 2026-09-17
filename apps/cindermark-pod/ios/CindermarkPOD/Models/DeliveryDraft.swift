@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 /// The working state of one stop between "arrived" and "signed".

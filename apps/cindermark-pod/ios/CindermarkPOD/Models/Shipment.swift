@@ -152,15 +152,15 @@ struct ShipmentEnvelope: Codable {
 /// Records the app produces itself keep the synthesized decoder: there, a
 /// missing key means a corrupt archive and should be loud.
 private extension KeyedDecodingContainer {
-   /// The value at `key`, or `fallback` when it is absent, null, or the wrong type.
+   /// The value at `key`, or `fallback` when it is absent, null, or the wrong
+   /// type. `try?` flattens rather than nesting the optional, so one `??`
+   /// covers all three cases.
    func value<T: Decodable>(_ key: Key, or fallback: T) -> T {
-      guard let decoded = try? decodeIfPresent(T.self, forKey: key) else { return fallback }
-      return decoded ?? fallback
+      (try? decodeIfPresent(T.self, forKey: key)) ?? fallback
    }
 
    func optionalValue<T: Decodable>(_ key: Key) -> T? {
-      guard let decoded = try? decodeIfPresent(T.self, forKey: key) else { return nil }
-      return decoded
+      try? decodeIfPresent(T.self, forKey: key)
    }
 }
 

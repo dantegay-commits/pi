@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 /// The local Shipped folder: every signed delivery, filed by year and month,

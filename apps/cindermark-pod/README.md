@@ -12,6 +12,7 @@ Two halves, both in this directory:
 | `wordpress-plugin/cindermark-pod/` | The site end. Receives the signed record, files it, sends the email. |
 | `samples/manifest-example.json` | A manifest in the format the app imports. |
 | `brand/` | The logo source and the script that rebuilds the artwork from it. |
+| `verify/` | Compiles and tests the portable core without a Mac. |
 | `docs/` | Verifying a record, and notes on patient data. |
 
 ## What happens at the door
@@ -240,6 +241,28 @@ See `docs/verifying-a-record.md`. In short: take the archived JSON, blank
 `payload_hash`, re-encode it with sorted keys, and hash it. It will match the
 hash printed on the PDF unless the record has been edited.
 
+## Verifying without a Mac
+
+```sh
+./verify/run.sh
+```
+
+Compiles the parts of the app that do not depend on Apple's UI frameworks and
+runs them, on any machine with a Swift toolchain - no Xcode. 36 checks on the
+app side, 12 on the server side.
+
+It cannot build the app, and it never touches a view. What it proves is the
+logic that is easy to get wrong and invisible to a code review: that the models
+survive the coders that archive them, that a hand-edited manifest still imports,
+that the record hash verifies by the documented procedure, and - the seam most
+likely to fail silently - that the exact bytes the app hashes and signs are what
+the WordPress plugin recomputes, with every field the plugin reads present in
+what the app emitted. A renamed key does not crash the plugin; it just files a
+record with an empty customer.
+
+`verify/README.md` has the details. This found two real defects on first run, so
+it is worth re-running after changes to the models or the coding layer.
+
 ## Running the plugin's tests
 
 ```sh
@@ -251,9 +274,12 @@ allow-list and file format sniffing. No WordPress install needed.
 
 ## What this does not do
 
-- **It is not verified against a real build.** The Swift was written without a
-  Mac to compile it on; expect to fix small things the first time you open it in
-  Xcode. The PHP is syntax-checked and its auth path is tested.
+- **The app has never been built by Xcode.** It was written without a Mac, so
+  expect to fix small things the first time you open it. What *has* been
+  compiled and exercised is the portable core - see "Verifying without a Mac"
+  below - which covers the models, the archive round-trip, the record hash and
+  the agreement between the app and the plugin, but not a single view, the PDF
+  renderer, PencilKit or Core Location.
 - The logo artwork is recovered from a photograph, not from the original vector
   file, so it is very slightly soft at large sizes and the two brand colours are
   measured approximations. `brand/README.md` covers replacing both.

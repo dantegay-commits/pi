@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 /// Operator configuration. Everything here except the two secrets lives in
