@@ -47,7 +47,7 @@ class CMPOD_Auth {
 
 		$allowed = CMPOD_Settings::allowed_devices();
 		if ( ! empty( $allowed ) && ! in_array( $device, $allowed, true ) ) {
-			return self::refuse( __( 'This iPad is not on the allowed device list for this site.', 'cindermark-pod' ) );
+			return self::refuse( __( 'This device is not on the allowed device list for this site.', 'cindermark-pod' ) );
 		}
 
 		if ( ! ctype_digit( $timestamp ) ) {
@@ -56,7 +56,7 @@ class CMPOD_Auth {
 		$skew = abs( time() - (int) $timestamp );
 		if ( $skew > self::MAX_SKEW_SECONDS ) {
 			return self::refuse(
-				__( "The iPad's clock is more than five minutes away from the site's. Check the date and time settings on the iPad.", 'cindermark-pod' )
+				__( "The device clock is more than five minutes away from the site's. Check its date and time settings.", 'cindermark-pod' )
 			);
 		}
 
@@ -69,7 +69,7 @@ class CMPOD_Auth {
 		$canonical = $device . "\n" . $timestamp . "\n" . $nonce . "\n" . $hash;
 		$expected  = hash_hmac( 'sha256', $canonical, $secret );
 		if ( ! hash_equals( $expected, strtolower( $signature ) ) ) {
-			return self::refuse( __( 'The request signature did not verify. Check that the iPad has the current pairing secret.', 'cindermark-pod' ) );
+			return self::refuse( __( 'The request signature did not verify. Check that the device has the current pairing secret.', 'cindermark-pod' ) );
 		}
 
 		// Claim the nonce last: a request that failed verification should not be

@@ -3,7 +3,7 @@ import Foundation
 /// On-disk layout inside the app's Documents directory. Documents is exposed to
 /// the Files app (UIFileSharingEnabled + LSSupportsOpeningDocumentsInPlace), so
 /// this layout is what a dispatcher sees when they open
-/// "On My iPad > CINDERMARK POD".
+/// the Files app, under "CINDERMARK POD".
 ///
 ///     Documents/
 ///       Shipped/2026/09/POD-SO-10482-20260917-141203.pdf

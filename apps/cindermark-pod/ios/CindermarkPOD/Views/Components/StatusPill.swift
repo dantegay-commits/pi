@@ -25,21 +25,44 @@ struct StatusPill: View {
 }
 
 /// Label/value row used throughout the detail panes.
+///
+/// Side by side on a wide screen. On a phone the fixed label column would leave
+/// roughly 200pt for values like a 64-character SHA-256, so there the label
+/// moves above the value and the value gets the full width.
 struct DetailRow: View {
    let label: String
    let value: String
    var monospaced = false
 
+   @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+   private var labelText: some View {
+      Text(label)
+         .font(.subheadline)
+         .foregroundStyle(.secondary)
+   }
+
+   private var valueText: some View {
+      Text(value)
+         .font(monospaced ? .system(.subheadline, design: .monospaced) : .subheadline)
+         .textSelection(.enabled)
+         .fixedSize(horizontal: false, vertical: true)
+   }
+
    var body: some View {
-      HStack(alignment: .firstTextBaseline, spacing: 12) {
-         Text(label)
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-            .frame(width: 150, alignment: .leading)
-         Text(value)
-            .font(monospaced ? .system(.subheadline, design: .monospaced) : .subheadline)
-            .textSelection(.enabled)
+      Group {
+         if horizontalSizeClass == .regular {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+               labelText.frame(width: 150, alignment: .leading)
+               valueText.frame(maxWidth: .infinity, alignment: .leading)
+            }
+         } else {
+            VStack(alignment: .leading, spacing: 2) {
+               labelText
+               valueText
+            }
             .frame(maxWidth: .infinity, alignment: .leading)
+         }
       }
       .accessibilityElement(children: .combine)
       .accessibilityLabel("\(label): \(value)")

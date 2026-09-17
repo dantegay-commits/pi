@@ -171,11 +171,11 @@ class CMPOD_Settings {
 
 			<?php if ( isset( $_GET['rotated'] ) ) : ?>
 				<div class="notice notice-warning"><p>
-					<?php esc_html_e( 'A new pairing secret was generated. Enter it on every iPad; devices still holding the old secret will be refused.', 'cindermark-pod' ); ?>
+					<?php esc_html_e( 'A new pairing secret was generated. Enter it on every paired device; anything still holding the old secret will be refused.', 'cindermark-pod' ); ?>
 				</p></div>
 			<?php endif; ?>
 
-			<h2><?php esc_html_e( 'Pair an iPad', 'cindermark-pod' ); ?></h2>
+			<h2><?php esc_html_e( 'Pair a device', 'cindermark-pod' ); ?></h2>
 			<p><?php esc_html_e( 'In the CINDERMARK POD app, open Settings and enter this site address and pairing secret.', 'cindermark-pod' ); ?></p>
 			<table class="form-table" role="presentation">
 				<tr>
@@ -218,7 +218,7 @@ class CMPOD_Settings {
 						<th scope="row"><label for="cmpod_bcc"><?php esc_html_e( 'Always copy', 'cindermark-pod' ); ?></label></th>
 						<td>
 							<input id="cmpod_bcc" class="regular-text" type="email" name="<?php echo esc_attr( self::OPTION ); ?>[bcc_email]" value="<?php echo esc_attr( $settings['bcc_email'] ); ?>" />
-							<p class="description"><?php esc_html_e( 'Dispatch address that receives a copy of every receipt. The iPad can also set this per run.', 'cindermark-pod' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Dispatch address that receives a copy of every receipt. The app can also set this per run.', 'cindermark-pod' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -246,7 +246,7 @@ class CMPOD_Settings {
 						<th scope="row"><label for="cmpod_devices"><?php esc_html_e( 'Allowed device ids', 'cindermark-pod' ); ?></label></th>
 						<td>
 							<textarea id="cmpod_devices" class="large-text code" rows="4" name="<?php echo esc_attr( self::OPTION ); ?>[allowed_devices]"><?php echo esc_textarea( $settings['allowed_devices'] ); ?></textarea>
-							<p class="description"><?php esc_html_e( 'One per line, as shown in the app under Settings > This iPad. Leave empty to accept any device that has the pairing secret.', 'cindermark-pod' ); ?></p>
+							<p class="description"><?php esc_html_e( 'One per line, as shown in the app under Settings > This device. Leave empty to accept any device that has the pairing secret.', 'cindermark-pod' ); ?></p>
 						</td>
 					</tr>
 				</table>

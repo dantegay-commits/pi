@@ -11,13 +11,14 @@ struct RootView: View {
       NavigationSplitView(columnVisibility: $columnVisibility) {
          StopListView(selection: $selectedStop)
       } detail: {
-         NavigationStack {
-            if let id = selectedStop, let shipment = shipments.shipment(id: id) {
-               ShipmentDetailView(shipment: shipment)
-                  .id(shipment.id)
-            } else {
-               NoStopSelectedView()
-            }
+         // No NavigationStack here: the detail column is already a navigation
+         // container, and on a phone - where the split view collapses into one
+         // stack - nesting a second one gives the pushed screen two title bars.
+         if let id = selectedStop, let shipment = shipments.shipment(id: id) {
+            ShipmentDetailView(shipment: shipment)
+               .id(shipment.id)
+         } else {
+            NoStopSelectedView()
          }
       }
       .navigationSplitViewStyle(.balanced)

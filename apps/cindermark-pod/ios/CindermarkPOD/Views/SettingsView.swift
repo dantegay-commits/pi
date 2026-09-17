@@ -37,19 +37,21 @@ struct SettingsView: View {
 
    private var siteSection: some View {
       Section {
-         LabeledContent("Site address") {
-            TextField("cindermarklogistics.com", text: $settings.siteURLString)
-               .textContentType(.URL)
-               .keyboardType(.URL)
-               .textInputAutocapitalization(.never)
-               .autocorrectionDisabled()
-               .multilineTextAlignment(.trailing)
-         }
-         LabeledContent("Pairing secret") {
-            SecureField("Paste from the plugin settings", text: $settings.sharedSecret)
-               .multilineTextAlignment(.trailing)
-         }
-         LabeledContent("This iPad") {
+         LabeledField(
+            label: "Site address",
+            prompt: "cindermarklogistics.com",
+            text: $settings.siteURLString,
+            contentType: .URL,
+            keyboard: .URL,
+            autocapitalize: false
+         )
+         LabeledField(
+            label: "Pairing secret",
+            prompt: "Paste from the plugin settings",
+            text: $settings.sharedSecret,
+            isSecure: true
+         )
+         LabeledContent("This device") {
             Text(settings.deviceId)
                .font(.system(.footnote, design: .monospaced))
                .textSelection(.enabled)
@@ -82,23 +84,20 @@ struct SettingsView: View {
 
    private var courierSection: some View {
       Section {
-         LabeledContent("Driver name") {
-            TextField("Printed on every receipt", text: $settings.driverName)
-               .multilineTextAlignment(.trailing)
-         }
-         LabeledContent("Copy receipts to") {
-            TextField("dispatch@example.com", text: $settings.operationsEmail)
-               .textContentType(.emailAddress)
-               .keyboardType(.emailAddress)
-               .textInputAutocapitalization(.never)
-               .autocorrectionDisabled()
-               .multilineTextAlignment(.trailing)
-         }
+         LabeledField(label: "Driver name", prompt: "Printed on every receipt", text: $settings.driverName)
+         LabeledField(
+            label: "Copy receipts to",
+            prompt: "dispatch@example.com",
+            text: $settings.operationsEmail,
+            contentType: .emailAddress,
+            keyboard: .emailAddress,
+            autocapitalize: false
+         )
          Toggle("Email the customer a copy", isOn: $settings.sendCustomerEmail)
       } header: {
          SectionHeading(title: "Courier")
       } footer: {
-         Text("Turning off the customer email still files the delivery on the site and on this iPad.")
+         Text("Turning off the customer email still files the delivery on the site and on this device.")
       }
    }
 
@@ -118,7 +117,7 @@ struct SettingsView: View {
                .foregroundStyle(.secondary)
          }
          if location.authorizationStatus == .denied || location.authorizationStatus == .restricted {
-            Button("Open iPad Settings") {
+            Button("Open Settings") {
                guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                UIApplication.shared.open(url)
             }
@@ -144,7 +143,7 @@ struct SettingsView: View {
       } header: {
          SectionHeading(title: "Branding")
       } footer: {
-         Text("Add the CINDERMARK artwork to LogoPrimary, LogoDocument and LogoMark in the project's asset catalog and rebuild. Until then the app and the receipts use a plain wordmark.")
+         Text("The logo is used on screen, on the app icon and at the top of every receipt. To change it, replace the image sets in the project's asset catalog and rebuild.")
       }
    }
 
@@ -160,9 +159,9 @@ struct SettingsView: View {
             archive.reload()
          }
       } header: {
-         SectionHeading(title: "On this iPad")
+         SectionHeading(title: "On this device")
       } footer: {
-         Text("Signed deliveries live in Files under On My iPad > CINDERMARK POD > Shipped, filed by year and month.")
+         Text("Signed deliveries live in the Files app under CINDERMARK POD > Shipped, filed by year and month.")
       }
    }
 

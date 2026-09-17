@@ -56,11 +56,45 @@ reader to assume.
 
 ## Requirements
 
-- Xcode 16 or newer, and an Apple Developer account to run on a real iPad
-- iPadOS 17 or newer (the app also runs on iPhone; the layout is designed for
-  iPad)
-- An Apple Pencil, for the input it was built for
+- Xcode 16 or newer, and an Apple Developer account to run on real hardware
+- iOS or iPadOS 16 or newer
+- An Apple Pencil, for the input the signature screen was built for. A finger
+  works; turn off "Apple Pencil only" in Settings first.
 - WordPress 6.2+ on PHP 7.4+, with working outbound mail
+
+## Which devices it runs on
+
+Every iPhone and iPad that can run iOS 16: **iPhone 8 and later**, **iPad 5th
+generation and later**, all iPad Air, iPad mini 5 and later, and every iPad Pro.
+That is roughly everything Apple has sold since 2017.
+
+iOS 16 rather than 17 is a deliberate choice. Dropping to 16 costs nothing and
+picks up the iPhone 8, iPhone X and the 5th-generation iPad - exactly the
+hand-me-down devices a small fleet ends up running. Going further back to iOS 15
+would mean giving up `NavigationSplitView`, `ShareLink` and `LabeledContent`,
+which is to say the whole iPad two-pane design, to gain devices from 2015 and
+2016 that cannot be bought new and mostly have dead batteries. Not worth it.
+
+The layout adapts on **size class, not device**, which matters more than it
+sounds:
+
+| Width | What you get |
+|---|---|
+| Regular (iPad, iPhone Max in landscape) | Two panes: run list beside the stop; manifest beside the signature box |
+| Compact (any iPhone, iPad in Slide Over or a narrow Split View) | One pane at a time; the manifest moves behind an "Items & terms" button so the signature box is never squeezed off screen |
+
+Because it keys off size class, an iPad in Slide Over gets the phone layout
+automatically, and a Max-sized iPhone turned landscape gets the two-pane one.
+
+Two details the phone layout exists to protect:
+
+- **The signature canvas is never inside a scroll view.** `PKCanvasView` is
+  itself a scroll view; nesting the two makes a finger-drawn signature scroll
+  the page instead of drawing on it. On a narrow screen the canvas takes
+  whatever height is left over rather than being placed in a scrolling column.
+- **Text fields get the full row width.** `LabeledContent` puts the field in the
+  trailing half, which is fine on an iPad and leaves a phone about enough room
+  to type an email address into but not to check it.
 
 ## Building the app
 
@@ -74,7 +108,7 @@ Then, once:
    your team. Xcode fills in a provisioning profile.
 2. Change **Bundle Identifier** from `com.cindermark.pod` to something in a
    domain you own if you plan to distribute through Apple Business Manager.
-3. Build and run on the iPad.
+3. Build and run. The app builds for iPhone and iPad from the one target.
 
 There are no package dependencies. The project uses a file-system synchronised
 group, so new Swift files added to `ios/CindermarkPOD/` are picked up without
@@ -225,7 +259,7 @@ allow-list and file format sniffing. No WordPress install needed.
   measured approximations. `brand/README.md` covers replacing both.
 - No offline map tiles, barcode scanning, temperature logging or route
   optimisation.
-- No multi-driver accounts. Every iPad is one device with one driver name.
+- No multi-driver accounts. Every device carries one driver name.
 - Nothing is deleted on uninstall. A signed proof of delivery is a business
   record; removing the plugin removes its settings and leaves the archive alone.
 - Retention and disposal are not automated. Decide a retention period and apply

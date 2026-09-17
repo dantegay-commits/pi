@@ -40,7 +40,7 @@ enum PodAPIError: LocalizedError {
    var errorDescription: String? {
       switch self {
       case .notLinked:
-         return "This iPad is not linked to the CINDERMARK site yet. Add the site address and pairing secret in Settings."
+         return "This device is not linked to the CINDERMARK site yet. Add the site address and pairing secret in Settings."
       case .badResponse:
          return "The site replied with something this app could not read. Check that the CINDERMARK POD plugin is active."
       case let .server(status, message):

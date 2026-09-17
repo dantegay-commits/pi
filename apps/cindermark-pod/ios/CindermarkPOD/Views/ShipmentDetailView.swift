@@ -6,8 +6,11 @@ struct ShipmentDetailView: View {
    let shipment: Shipment
 
    @EnvironmentObject private var settings: AppSettings
+   @Environment(\.horizontalSizeClass) private var horizontalSizeClass
    @StateObject private var draft: DeliveryDraft
    @State private var showingSignature = false
+
+   private var isWide: Bool { horizontalSizeClass == .regular }
 
    init(shipment: Shipment) {
       self.shipment = shipment
@@ -93,19 +96,16 @@ struct ShipmentDetailView: View {
                .font(.subheadline)
                .foregroundStyle(.secondary)
          }
-         LabeledContent("Contact") {
-            TextField("Name", text: $draft.customer.contactName)
-               .multilineTextAlignment(.trailing)
-         }
-         LabeledContent("Email receipt to") {
-            TextField("name@example.com", text: $draft.customer.email)
-               .textContentType(.emailAddress)
-               .keyboardType(.emailAddress)
-               .textInputAutocapitalization(.never)
-               .autocorrectionDisabled()
-               .multilineTextAlignment(.trailing)
-               .foregroundStyle(emailIsUsable ? Color.primary : BrandColor.alert)
-         }
+         LabeledField(label: "Contact", prompt: "Name", text: $draft.customer.contactName)
+         LabeledField(
+            label: "Email receipt to",
+            prompt: "name@example.com",
+            text: $draft.customer.email,
+            contentType: .emailAddress,
+            keyboard: .emailAddress,
+            autocapitalize: false,
+            foreground: emailIsUsable ? nil : BrandColor.alert
+         )
          if !draft.customer.phone.isBlank {
             LabeledContent("Phone", value: draft.customer.phone)
          }
@@ -130,36 +130,54 @@ struct ShipmentDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
          }
 
-         HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 2) {
-               Text("\(draft.unitsReceived) of \(draft.unitsShipped) units received")
-                  .font(.subheadline.weight(.semibold))
-               if draft.hasExceptions {
-                  Text("\(draft.exceptions.count) exception\(draft.exceptions.count == 1 ? "" : "s") recorded")
-                     .font(.caption)
-                     .foregroundStyle(BrandColor.alert)
-               } else {
-                  Text("No exceptions")
-                     .font(.caption)
-                     .foregroundStyle(.secondary)
-               }
+         if isWide {
+            HStack(spacing: 16) {
+               receiptSummary
+               Spacer()
+               signatureButton
             }
-            Spacer()
-            Button {
-               showingSignature = true
-            } label: {
-               Label("Capture signature", systemImage: "signature")
-                  .font(.headline)
-                  .padding(.horizontal, 10)
-                  .padding(.vertical, 6)
+         } else {
+            VStack(spacing: 10) {
+               receiptSummary
+                  .frame(maxWidth: .infinity, alignment: .leading)
+               signatureButton
+                  .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(!issues.isEmpty)
          }
       }
-      .padding(.horizontal, 20)
+      .padding(.horizontal, isWide ? 20 : 16)
       .padding(.vertical, 14)
       .background(.bar)
+   }
+
+   private var receiptSummary: some View {
+      VStack(alignment: .leading, spacing: 2) {
+         Text("\(draft.unitsReceived) of \(draft.unitsShipped) units received")
+            .font(.subheadline.weight(.semibold))
+         if draft.hasExceptions {
+            Text("\(draft.exceptions.count) exception\(draft.exceptions.count == 1 ? "" : "s") recorded")
+               .font(.caption)
+               .foregroundStyle(BrandColor.alert)
+         } else {
+            Text("No exceptions")
+               .font(.caption)
+               .foregroundStyle(.secondary)
+         }
+      }
+   }
+
+   private var signatureButton: some View {
+      Button {
+         showingSignature = true
+      } label: {
+         Label("Capture signature", systemImage: "signature")
+            .font(.headline)
+            .frame(maxWidth: isWide ? nil : .infinity)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+      }
+      .buttonStyle(.borderedProminent)
+      .disabled(!issues.isEmpty)
    }
 }
 
@@ -167,6 +185,10 @@ struct ShipmentDetailView: View {
 private struct ManifestLineEditor: View {
    let line: ReceivedLineItem
    @ObservedObject var draft: DeliveryDraft
+
+   @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+   private var isWide: Bool { horizontalSizeClass == .regular }
 
    var body: some View {
       VStack(alignment: .leading, spacing: 10) {
@@ -178,7 +200,7 @@ private struct ManifestLineEditor: View {
                .frame(maxWidth: .infinity, alignment: .leading)
          }
 
-         HStack(spacing: 6) {
+         FlowingPills(spacing: 6) {
             if !line.item.lotNumber.isBlank {
                StatusPill(title: "Lot \(line.item.lotNumber)")
             }
@@ -196,33 +218,14 @@ private struct ManifestLineEditor: View {
             }
          }
 
-         HStack(spacing: 16) {
-            Stepper(
-               value: Binding(
-                  get: { line.quantityReceived },
-                  set: { draft.setQuantityReceived($0, for: line.id) }
-               ),
-               in: 0 ... max(line.item.quantityShipped, 0)
-            ) {
-               Text("\(line.quantityReceived) of \(line.item.quantityShipped) \(line.item.unitOfMeasure)")
-                  .font(.subheadline.weight(.medium))
-                  .monospacedDigit()
+         if isWide {
+            HStack(spacing: 16) {
+               quantityStepper.frame(maxWidth: 260)
+               dispositionPicker
             }
-            .frame(maxWidth: 260)
-
-            Picker(
-               "Status",
-               selection: Binding(
-                  get: { line.disposition },
-                  set: { draft.setDisposition($0, for: line.id) }
-               )
-            ) {
-               ForEach(ItemDisposition.allCases) { disposition in
-                  Text(disposition.label).tag(disposition)
-               }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+         } else {
+            quantityStepper
+            dispositionPicker
          }
 
          if !line.isClean {
@@ -249,6 +252,36 @@ private struct ManifestLineEditor: View {
       }
       .padding(.vertical, 6)
    }
+
+   private var quantityStepper: some View {
+      Stepper(
+         value: Binding(
+            get: { line.quantityReceived },
+            set: { draft.setQuantityReceived($0, for: line.id) }
+         ),
+         in: 0 ... max(line.item.quantityShipped, 0)
+      ) {
+         Text("\(line.quantityReceived) of \(line.item.quantityShipped) \(line.item.unitOfMeasure)")
+            .font(.subheadline.weight(.medium))
+            .monospacedDigit()
+      }
+   }
+
+   private var dispositionPicker: some View {
+      Picker(
+         "Status",
+         selection: Binding(
+            get: { line.disposition },
+            set: { draft.setDisposition($0, for: line.id) }
+         )
+      ) {
+         ForEach(ItemDisposition.allCases) { disposition in
+            Text(disposition.label).tag(disposition)
+         }
+      }
+      .pickerStyle(.segmented)
+      .labelsHidden()
+   }
 }
 
 /// Shown once a stop has been signed.
@@ -266,10 +299,10 @@ private struct CompletedStopView: View {
          if let delivery {
             DeliveryDetailView(delivery: delivery)
          } else {
-            ContentUnavailableView(
-               "Signed",
+            EmptyStateView(
+               title: "Signed",
                systemImage: "checkmark.seal",
-               description: Text("This stop was signed on another device or its archived copy is missing from this iPad.")
+               message: "This stop was signed on another device, or its archived copy is missing from this one."
             )
          }
       }

@@ -4,6 +4,7 @@ import SwiftUI
 struct ArchiveView: View {
    @EnvironmentObject private var archive: ShippedArchive
    @Environment(\.dismiss) private var dismiss
+   @Environment(\.horizontalSizeClass) private var horizontalSizeClass
    @State private var selected: ArchivedDelivery?
    @State private var query = ""
 
@@ -22,48 +23,70 @@ struct ArchiveView: View {
    }
 
    var body: some View {
-      NavigationSplitView {
-         List(selection: $selected) {
-            ForEach(groups, id: \.title) { group in
-               Section(group.title) {
-                  ForEach(group.deliveries) { delivery in
+      // A split view inside a sheet collapses awkwardly on a phone, so narrow
+      // widths get a plain push navigation instead. Same list, same rows.
+      Group {
+         if horizontalSizeClass == .regular {
+            NavigationSplitView {
+               deliveryList
+            } detail: {
+               if let selected {
+                  DeliveryDetailView(delivery: selected)
+                     .id(selected.id)
+               } else {
+                  EmptyStateView(title: "Select a delivery", systemImage: "doc.text")
+               }
+            }
+         } else {
+            NavigationStack {
+               deliveryList
+                  .navigationDestination(for: ArchivedDelivery.self) { delivery in
+                     DeliveryDetailView(delivery: delivery)
+                  }
+            }
+         }
+      }
+   }
+
+   @ViewBuilder private var deliveryList: some View {
+      List(selection: $selected) {
+         ForEach(groups, id: \.title) { group in
+            Section(group.title) {
+               ForEach(group.deliveries) { delivery in
+                  if horizontalSizeClass == .regular {
                      ArchiveRow(delivery: delivery)
                         .tag(delivery)
+                  } else {
+                     NavigationLink(value: delivery) {
+                        ArchiveRow(delivery: delivery)
+                     }
                   }
                }
             }
          }
-         .searchable(text: $query, prompt: "Order, customer or signer")
-         .navigationTitle("Shipped")
-         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-               Button("Close") { dismiss() }
-            }
-            ToolbarItem(placement: .primaryAction) {
-               Button {
-                  archive.reload()
-               } label: {
-                  Label("Refresh", systemImage: "arrow.clockwise")
-               }
+      }
+      .searchable(text: $query, prompt: "Order, customer or signer")
+      .navigationTitle("Shipped")
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+         ToolbarItem(placement: .cancellationAction) {
+            Button("Close") { dismiss() }
+         }
+         ToolbarItem(placement: .primaryAction) {
+            Button {
+               archive.reload()
+            } label: {
+               Label("Refresh", systemImage: "arrow.clockwise")
             }
          }
-         .overlay {
-            if archive.deliveries.isEmpty {
-               ContentUnavailableView(
-                  "Nothing shipped yet",
-                  systemImage: "folder",
-                  description: Text("Signed deliveries are filed here by month, and in the Files app under CINDERMARK POD.")
-               )
-            }
-         }
-      } detail: {
-         NavigationStack {
-            if let selected {
-               DeliveryDetailView(delivery: selected)
-                  .id(selected.id)
-            } else {
-               ContentUnavailableView("Select a delivery", systemImage: "doc.text")
-            }
+      }
+      .overlay {
+         if archive.deliveries.isEmpty {
+            EmptyStateView(
+               title: "Nothing shipped yet",
+               systemImage: "folder",
+               message: "Signed deliveries are filed here by month, and in the Files app under CINDERMARK POD."
+            )
          }
       }
    }

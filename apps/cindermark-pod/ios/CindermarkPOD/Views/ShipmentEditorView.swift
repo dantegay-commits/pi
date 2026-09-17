@@ -195,7 +195,7 @@ private struct LineItemEditorView: View {
       .formStyle(.grouped)
       .navigationTitle(item.sku.isBlank ? "Item" : item.sku)
       .navigationBarTitleDisplayMode(.inline)
-      .onChange(of: hasExpiration) { _, enabled in
+      .onChange(of: hasExpiration) { enabled in
          if !enabled { item.expirationDate = nil }
       }
    }

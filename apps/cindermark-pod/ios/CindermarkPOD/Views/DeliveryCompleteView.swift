@@ -31,7 +31,7 @@ struct DeliveryCompleteView: View {
             statusCard
 
             VStack(alignment: .leading, spacing: 6) {
-               SectionHeading(title: "Filed on this iPad")
+               SectionHeading(title: "Filed on this device")
                Text(outcome.delivery.pdfRelativePath)
                   .font(.system(.footnote, design: .monospaced))
                   .foregroundStyle(.secondary)
@@ -82,7 +82,7 @@ struct DeliveryCompleteView: View {
                   .foregroundStyle(.secondary)
             }
          } else {
-            Label("Saved on this iPad, not sent yet", systemImage: "clock.arrow.circlepath")
+            Label("Saved on this device, not sent yet", systemImage: "clock.arrow.circlepath")
                .foregroundStyle(BrandColor.alert)
             Text(outcome.uploadError ?? "It will send automatically once there is signal.")
                .font(.footnote)

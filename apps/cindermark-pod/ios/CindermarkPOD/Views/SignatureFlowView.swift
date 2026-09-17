@@ -1,9 +1,18 @@
 import CoreLocation
 import SwiftUI
 
-/// The screen the customer sees. Full-screen, landscape-friendly, and stripped
-/// of anything that is not either the thing being agreed to or the place to
-/// sign it.
+/// The screen the customer sees. Stripped of anything that is not either the
+/// thing being agreed to or the place to sign it.
+///
+/// The two layouts are driven by size class, not by device, so an iPad in Slide
+/// Over gets the narrow arrangement and an iPhone in landscape gets whatever
+/// fits. On a wide screen the manifest sits beside the signature; on a narrow
+/// one it moves behind a button, because the one thing that must never be
+/// squeezed off a phone screen is the box the customer signs in.
+///
+/// The canvas is never placed inside a `ScrollView`. `PKCanvasView` is itself a
+/// scroll view, and nesting the two makes a finger-drawn signature scroll the
+/// page instead of drawing.
 struct SignatureFlowView: View {
    @ObservedObject var draft: DeliveryDraft
 
@@ -17,6 +26,7 @@ struct SignatureFlowView: View {
    @State private var isSubmitting = false
    @State private var errorMessage: String?
    @State private var outcome: DeliveryOutcome?
+   @State private var showingItems = false
 
    private var isWide: Bool { horizontalSizeClass == .regular }
 
@@ -42,18 +52,16 @@ struct SignatureFlowView: View {
          if isWide {
             HStack(alignment: .top, spacing: 0) {
                detailColumn
-                  .frame(width: 340)
+                  .frame(width: 330)
                   .background(BrandColor.paper)
                Divider()
                signingColumn
             }
          } else {
-            ScrollView {
-               VStack(spacing: 0) {
-                  detailColumn
-                  signingColumn
-                     .frame(minHeight: 420)
-               }
+            VStack(spacing: 0) {
+               compactSummaryBar
+               Divider()
+               signingColumn
             }
          }
       }
@@ -64,19 +72,33 @@ struct SignatureFlowView: View {
             Button("Cancel") { dismiss() }
                .disabled(isSubmitting)
          }
-         ToolbarItem(placement: .principal) {
-            BrandLogoView(height: 20)
+         if isWide {
+            ToolbarItem(placement: .principal) {
+               BrandLogoView(height: 20)
+            }
          }
          ToolbarItem(placement: .confirmationAction) {
             Button {
                Task { await submit() }
             } label: {
-               Text("Complete delivery").fontWeight(.semibold)
+               Text(isWide ? "Complete delivery" : "Complete").fontWeight(.semibold)
             }
             .disabled(!blockers.isEmpty || isSubmitting)
          }
       }
       .overlay { submittingOverlay }
+      .sheet(isPresented: $showingItems) {
+         NavigationStack {
+            detailColumn
+               .navigationTitle("What you are signing for")
+               .navigationBarTitleDisplayMode(.inline)
+               .toolbar {
+                  ToolbarItem(placement: .confirmationAction) {
+                     Button("Done") { showingItems = false }
+                  }
+               }
+         }
+      }
       .alert("Could not complete this delivery", isPresented: presenting($errorMessage)) {
          Button("OK", role: .cancel) {}
       } message: {
@@ -84,7 +106,7 @@ struct SignatureFlowView: View {
       }
    }
 
-   // MARK: - Left column
+   // MARK: - The manifest, beside the canvas or behind a button
 
    private var detailColumn: some View {
       ScrollView {
@@ -106,14 +128,16 @@ struct SignatureFlowView: View {
                   HStack(alignment: .firstTextBaseline, spacing: 8) {
                      Text("\(line.quantityReceived)")
                         .font(.subheadline.weight(.bold).monospacedDigit())
-                        .frame(width: 26, alignment: .trailing)
+                        .frame(minWidth: 26, alignment: .trailing)
                      VStack(alignment: .leading, spacing: 2) {
                         Text(line.item.itemDescription.isBlank ? line.item.sku : line.item.itemDescription)
                            .font(.subheadline)
+                           .fixedSize(horizontal: false, vertical: true)
                         if !line.isClean {
                            Text("\(line.disposition.label)\(line.note.isBlank ? "" : " - \(line.note.trimmed)")")
                               .font(.caption)
                               .foregroundStyle(BrandColor.alert)
+                              .fixedSize(horizontal: false, vertical: true)
                         }
                      }
                   }
@@ -128,12 +152,50 @@ struct SignatureFlowView: View {
                Text(BrandConfig.attestation)
                   .font(.caption)
                   .foregroundStyle(.secondary)
+                  .fixedSize(horizontal: false, vertical: true)
             }
 
             captureStatus
          }
          .padding(20)
+         .frame(maxWidth: .infinity, alignment: .leading)
       }
+   }
+
+   /// Narrow screens get the gist inline and the detail a tap away.
+   private var compactSummaryBar: some View {
+      Button {
+         showingItems = true
+      } label: {
+         HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+               Text(draft.customer.displayName)
+                  .font(.subheadline.weight(.semibold))
+                  .lineLimit(1)
+               HStack(spacing: 6) {
+                  Text("\(draft.unitsReceived) of \(draft.unitsShipped) units")
+                  if draft.hasExceptions {
+                     Text("·")
+                     Text("\(draft.exceptions.count) exception\(draft.exceptions.count == 1 ? "" : "s")")
+                        .foregroundStyle(BrandColor.alert)
+                  }
+               }
+               .font(.caption)
+               .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 8)
+            Text("Items & terms")
+               .font(.caption.weight(.semibold))
+            Image(systemName: "chevron.right")
+               .font(.caption2.weight(.semibold))
+               .foregroundStyle(.tertiary)
+         }
+         .padding(.horizontal, 16)
+         .padding(.vertical, 10)
+         .contentShape(Rectangle())
+      }
+      .buttonStyle(.plain)
+      .accessibilityHint("Shows every item on this delivery and the wording being agreed to")
    }
 
    private var captureStatus: some View {
@@ -144,8 +206,9 @@ struct SignatureFlowView: View {
          Label(locationStatusText, systemImage: locationStatusIcon)
             .font(.caption)
             .foregroundStyle(locationIsReady ? .secondary : BrandColor.alert)
+            .fixedSize(horizontal: false, vertical: true)
          if !settings.driverName.isBlank {
-            Label(settings.driverName, systemImage: "person.badge.shield.checkmark")
+            Label(settings.driverName, systemImage: "person.fill.checkmark")
                .font(.caption)
          }
       }
@@ -166,7 +229,7 @@ struct SignatureFlowView: View {
       case .denied:
          return "Location is off - the receipt will say so"
       case .restricted:
-         return "Location is restricted on this iPad"
+         return "Location is restricted on this device"
       default:
          return "Location permission has not been granted yet"
       }
@@ -176,68 +239,108 @@ struct SignatureFlowView: View {
       locationIsReady ? "location.fill" : "location.slash"
    }
 
-   // MARK: - Right column
+   // MARK: - Signing
 
    private var signingColumn: some View {
-      VStack(alignment: .leading, spacing: 14) {
-         HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-               Text("Printed name")
-                  .font(.caption.weight(.semibold))
-                  .foregroundStyle(.secondary)
-               TextField("Name of the person receiving", text: $draft.signer.printedName)
-                  .textContentType(.name)
-                  .textFieldStyle(.roundedBorder)
-                  .font(.title3)
-            }
-            VStack(alignment: .leading, spacing: 4) {
-               Text("Relationship")
-                  .font(.caption.weight(.semibold))
-                  .foregroundStyle(.secondary)
-               Picker("Relationship", selection: $draft.signer.relationship) {
-                  ForEach(SignerRelationship.allCases) { relationship in
-                     Text(relationship.label).tag(relationship)
-                  }
-               }
-               .pickerStyle(.menu)
-               .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .frame(width: 210)
-         }
+      VStack(alignment: .leading, spacing: isWide ? 14 : 10) {
+         signerFields
 
          if draft.signer.relationship == .other || !draft.signer.relationshipDetail.isBlank {
             TextField("How they are authorised to sign", text: $draft.signer.relationshipDetail)
                .textFieldStyle(.roundedBorder)
          }
 
+         // The canvas takes whatever is left, so it is as large as the screen
+         // allows and never scrolled out of reach.
          signatureBox
+            .frame(maxHeight: .infinity)
+            .layoutPriority(1)
 
-         HStack {
-            Toggle(isOn: $settings.pencilOnly) {
-               Label("Apple Pencil only", systemImage: "applepencil")
-                  .font(.footnote)
-            }
-            .toggleStyle(.switch)
-            .frame(maxWidth: 260)
-
-            Spacer()
-
-            Button(role: .destructive) {
-               pad.clear()
-            } label: {
-               Label("Clear", systemImage: "eraser")
-            }
-            .disabled(pad.strokeCount == 0)
-         }
+         canvasControls
 
          if let first = blockers.first {
             Label(first, systemImage: "info.circle")
                .font(.footnote)
                .foregroundStyle(.secondary)
+               .fixedSize(horizontal: false, vertical: true)
          }
       }
-      .padding(20)
+      .padding(isWide ? 20 : 16)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+   }
+
+   @ViewBuilder private var signerFields: some View {
+      if isWide {
+         HStack(alignment: .bottom, spacing: 16) {
+            printedNameField
+            relationshipField.frame(width: 210)
+         }
+      } else {
+         printedNameField
+         relationshipField
+      }
+   }
+
+   private var printedNameField: some View {
+      VStack(alignment: .leading, spacing: 4) {
+         Text("Printed name")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
+         TextField("Name of the person receiving", text: $draft.signer.printedName)
+            .textContentType(.name)
+            .textFieldStyle(.roundedBorder)
+            .font(isWide ? .title3 : .body)
+      }
+   }
+
+   private var relationshipField: some View {
+      VStack(alignment: .leading, spacing: 4) {
+         Text("Relationship")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
+         Picker("Relationship", selection: $draft.signer.relationship) {
+            ForEach(SignerRelationship.allCases) { relationship in
+               Text(relationship.label).tag(relationship)
+            }
+         }
+         .pickerStyle(.menu)
+         .frame(maxWidth: .infinity, alignment: .leading)
+      }
+   }
+
+   /// The pencil switch and Clear. Side by side when there is room, stacked when
+   /// there is not - at the largest accessibility text sizes they will not fit
+   /// on one line of a phone.
+   @ViewBuilder private var canvasControls: some View {
+      ViewThatFits(in: .horizontal) {
+         HStack {
+            pencilToggle
+            Spacer(minLength: 12)
+            clearButton
+         }
+         VStack(alignment: .leading, spacing: 8) {
+            pencilToggle
+            clearButton
+         }
+      }
+   }
+
+   private var pencilToggle: some View {
+      Toggle(isOn: $settings.pencilOnly) {
+         Label("Apple Pencil only", systemImage: "applepencil")
+            .font(.footnote)
+      }
+      .toggleStyle(.switch)
+      .fixedSize()
+   }
+
+   private var clearButton: some View {
+      Button(role: .destructive) {
+         pad.clear()
+      } label: {
+         Label("Clear", systemImage: "eraser")
+      }
+      .disabled(pad.strokeCount == 0)
    }
 
    private var signatureBox: some View {
@@ -254,11 +357,11 @@ struct SignatureFlowView: View {
             Rectangle()
                .fill(BrandColor.slate.opacity(0.35))
                .frame(height: 1)
-               .padding(.horizontal, 28)
+               .padding(.horizontal, isWide ? 28 : 18)
             Text("Sign above")
                .font(.caption)
                .foregroundStyle(BrandColor.slate)
-               .padding(.leading, 28)
+               .padding(.leading, isWide ? 28 : 18)
                .padding(.top, 6)
                .padding(.bottom, 14)
          }
@@ -266,7 +369,7 @@ struct SignatureFlowView: View {
          SignatureCanvas(pad: pad, pencilOnly: settings.pencilOnly)
             .clipShape(RoundedRectangle(cornerRadius: 14))
       }
-      .frame(minHeight: 300)
+      .frame(minHeight: isWide ? 300 : 170)
       .accessibilityLabel("Signature area")
    }
 
@@ -285,6 +388,7 @@ struct SignatureFlowView: View {
                   .multilineTextAlignment(.center)
             }
             .padding(28)
+            .frame(maxWidth: 320)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
          }
       }

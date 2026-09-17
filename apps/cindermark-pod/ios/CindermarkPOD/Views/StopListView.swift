@@ -191,7 +191,7 @@ private struct StopRow: View {
                .foregroundStyle(.secondary)
                .lineLimit(2)
          }
-         HStack(spacing: 6) {
+         FlowingPills(spacing: 6) {
             StatusPill(title: "\(shipment.lineItems.count) lines", systemImage: "list.bullet")
             if shipment.requiresColdChain {
                StatusPill(title: "Cold chain", systemImage: "thermometer.snowflake", tint: .blue)

@@ -46,7 +46,7 @@ struct SignatureCanvas: UIViewRepresentable {
       }
 
       func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-         MainActor.assumeIsolated {
+         Task { @MainActor in
             pad.drawingChanged()
          }
       }

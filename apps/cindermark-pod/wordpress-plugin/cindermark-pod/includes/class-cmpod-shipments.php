@@ -214,7 +214,7 @@ class CMPOD_Shipments {
 				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
 			);
 		}
-		echo '<p>' . esc_html__( 'The stop as the iPad will see it. Keys match the manifest file format documented with the app.', 'cindermark-pod' ) . '</p>';
+		echo '<p>' . esc_html__( 'The stop as the app will see it. Keys match the manifest file format documented with the app.', 'cindermark-pod' ) . '</p>';
 		printf(
 			'<textarea name="cmpod_manifest" rows="20" class="large-text code" spellcheck="false">%s</textarea>',
 			esc_textarea( $manifest )
